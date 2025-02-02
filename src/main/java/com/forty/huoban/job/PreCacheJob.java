@@ -41,13 +41,14 @@ public class PreCacheJob {
     /* 重点用户Id白名单: 只对部分重要用户进行缓存预热,暂时以确定的方式编写 */
     private final List<Long> mainUserList = Arrays.asList(1L,2L);
 
-    @Scheduled(cron = "0 0 2 * * *")
+    @Scheduled(cron = "0 40 15 * * *")
     public void preCache() {
         //利用redissonClient获取分布式锁
         RLock lock = redissonClient.getLock("forty:preCacheJob:doPreCache:lock");
         try {
             //设置waitTime = 0 即每个线程每次只抢一次，锁的过期时间为30000ms
             if (lock.tryLock(0,30000L,TimeUnit.MILLISECONDS)) {
+                System.out.println("getLock:" + Thread.currentThread().getId());
                 for (Long userId : mainUserList) {
                     //查数据库后存入内存
                     QueryWrapper<User> queryWrapper = new QueryWrapper<>();
@@ -57,17 +58,20 @@ public class PreCacheJob {
                     //自定义redis键的名称，要注意不要与已有名称冲突
                     String redisKey = String.format("forty:user:recommend:%s",userId);
                     try {
-                        valueOperations.set(redisKey,userPage,30000, TimeUnit.MILLISECONDS);  //1w毫秒
+                        valueOperations.set(redisKey,userPage,30000, TimeUnit.MILLISECONDS);  //3w毫秒
                     } catch (Exception e) {
                         log.error("redis set key error",e);
                     }
                 }
             }
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            log.error("doPreCache error",e);
         } finally {
-            //无论是否抛出异常最后都要
-            lock.unlock();
+            //无论是否抛出异常最后都要释放锁且只能释放自己的锁
+            if (lock.isHeldByCurrentThread()) {
+                System.out.println("unLock: " + Thread.currentThread().getId());
+                lock.unlock();
+            }
         }
     }
 }
