@@ -35,7 +35,7 @@ public class TeamController {
 
     @ApiOperation("新增队伍")
     @PostMapping("/add")
-    public Result<Long> addTeam(Team team) {
+    public Result<Long> addTeam(@RequestBody Team team) {
         if (team == null) {
             throw new BusinessException(ResultCodeEnum.PARAM_ERROR);
         }
@@ -43,12 +43,13 @@ public class TeamController {
         if (!res) {
             throw new BusinessException(ResultCodeEnum.SYSTEM_ERROR,"插入失败");
         }
+        System.out.println("Add Team Succeed");
         return Result.ok(team.getId());
     }
 
     @ApiOperation("删除队伍")
     @PostMapping("/delete")
-    public Result<Boolean> deleteTeam(Long id) {
+    public Result<Boolean> deleteTeam(@RequestBody Long id) {
         if (id == null) {
             throw new BusinessException(ResultCodeEnum.PARAM_ERROR);
         }
@@ -56,12 +57,13 @@ public class TeamController {
         if (!res){
             throw new BusinessException(ResultCodeEnum.SYSTEM_ERROR,"删除失败");
         }
+        System.out.println("Delete Team Succeed");
         return Result.ok(true);
     }
 
     @ApiOperation("修改队伍")
     @PostMapping("/update")
-    public Result<Boolean> updateTeam(Team team) {
+    public Result<Boolean> updateTeam(@RequestBody Team team) {
         if (team == null) {
             throw new BusinessException(ResultCodeEnum.PARAM_ERROR);
         }
@@ -96,6 +98,7 @@ public class TeamController {
         BeanUtils.copyProperties(team, teamQuery);
         QueryWrapper<Team> wrapper = new QueryWrapper<>(team);
         List<Team> list = teamService.list(wrapper);
+        System.out.println("Query Team Succeed");
         return Result.ok(list);
     }
 
@@ -112,6 +115,7 @@ public class TeamController {
         //加入对应分页参数后查询
         Page<Team> teamPage = new Page<>(teamQuery.getPageNum(),teamQuery.getPageSize());
         Page<Team> resPage = teamService.page(teamPage,wrapper);
+        System.out.println("Query Team Succeed");
         return Result.ok(resPage);
     }
 }
