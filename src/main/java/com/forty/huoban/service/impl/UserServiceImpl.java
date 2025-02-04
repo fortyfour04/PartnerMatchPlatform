@@ -81,7 +81,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
         // 3. 用户脱敏
         User safetyUser = getSafetyUser(user);
-        // 4. 记录用户的登录态
+        // 4. 记录用户的登录态和相关信息
         request.getSession().setAttribute(USER_LOGIN_STATE, safetyUser);
         System.out.println("Login Succeed");
         return safetyUser;

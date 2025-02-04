@@ -2,7 +2,7 @@ package com.forty.huoban.constant;
 
 /**
  * @author: FortyFour
- * @description:
+ * @description: 用户登录状态与权限参数值
  * @time: 2024/12/2 15:21
  * @version:
  */
