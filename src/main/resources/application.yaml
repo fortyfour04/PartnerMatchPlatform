@@ -8,7 +8,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/huoban
     username: root
-    password: 20040821abX-
+    password: ******
   # session失效时间（分钟）
   session:
     timeout: 86400 #两个月
