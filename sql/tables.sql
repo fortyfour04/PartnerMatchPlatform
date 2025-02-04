@@ -89,7 +89,7 @@ create table team (
                       description varchar(1024)                           null comment '队伍介绍',
                       maxNum      int                                     null comment '队伍最大人数',
                       expireTime  datetime                                null comment '队伍过期时间',
-                      status      int                                     not null comment '队伍状态(0-公开 1-私有 2-加密)',
+                      status      int                                     not null default 1 comment '队伍状态(0-公开 1-私有 2-加密)',
                       password    varchar(256)                            null comment '队伍密码',
                       createTime  datetime    default CURRENT_TIMESTAMP   null comment '创建时间',
                       updateTime  datetime    default CURRENT_TIMESTAMP   null on update CURRENT_TIMESTAMP comment '更新时间',
