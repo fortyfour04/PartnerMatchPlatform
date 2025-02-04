@@ -1,22 +1,25 @@
-package com.forty.huoban.model.domain;
+package com.forty.huoban.model.dto;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.forty.huoban.utils.PageRequest;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
-import java.io.Serializable;
 import java.util.Date;
 
 /**
- * 队伍
- * @TableName team
+ * @author: FortyFour
+ * @description: team查询数据传输对象
+ * @time: 2025/2/4 16:55
+ * @version:
  */
-@TableName(value ="team")
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class Team implements Serializable {
+public class TeamQuery extends PageRequest {
     /**
      * 队伍id
      */
-    @TableId(type = IdType.AUTO)
     private Long id;
 
     /**
@@ -50,11 +53,6 @@ public class Team implements Serializable {
     private Integer status;
 
     /**
-     * 队伍密码
-     */
-    private String password;
-
-    /**
      * 创建时间
      */
     private Date createTime;
@@ -64,12 +62,4 @@ public class Team implements Serializable {
      */
     private Date updateTime;
 
-    /**
-     * 是否删除
-     */
-    @TableLogic
-    private Integer isDeleted;
-
-    @TableField(exist = false)
-    private static final long serialVersionUID = 1L;
 }

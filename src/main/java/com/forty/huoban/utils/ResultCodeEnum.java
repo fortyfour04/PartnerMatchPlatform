@@ -15,7 +15,8 @@ public enum ResultCodeEnum {
     NOT_LOGIN(504,"尚未登录"),
     USER_ACCOUNT_USED(505,"账户名已被注册"),
     NO_AUTH(506,"无权限"),
-    NULL_ERROR(508,"空值错误");
+    NULL_ERROR(507,"空值错误"),
+    SYSTEM_ERROR(508,"系统错误");
 
     private Integer code;
     private String message;

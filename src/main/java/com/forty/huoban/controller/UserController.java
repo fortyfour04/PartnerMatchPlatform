@@ -87,14 +87,10 @@ public class UserController {
     @ApiOperation("获取当前用户界面")
     @GetMapping("/current")
     public Result<User> getCurrentUser(HttpServletRequest request) {
-//        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
-//        User currentUser = (User) userObj;
-//        if (currentUser == null) {
-//            throw new BusinessException(ResultCodeEnum.NOT_LOGIN);
-//        }
+        //判断是否有登录信息并获取当前用户 方法封装在service层便于多次调用
         User currentUser = userService.getLoginUser(request);
         long userId = currentUser.getId();
-        // TODO 校验用户是否合法
+        // 校验用户是否合法
         User user = userService.getById(userId);
         User safetyUser = userService.getSafetyUser(user);
         return Result.ok(safetyUser);
@@ -180,7 +176,6 @@ public class UserController {
             throw new BusinessException(ResultCodeEnum.NO_AUTH);
         }
         boolean bool = userService.removeById(id);
-
         return Result.ok(bool);
     }
 
