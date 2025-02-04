@@ -67,7 +67,7 @@ INSERT INTO user (username, userAccount, avatarUrl, profile, gender, userPasswor
 drop table if exists tags;
 
 create table tag (
-                     id          bigint auto_increment comment 'id'      primary key comment '主键id',
+                     id          bigint auto_increment                   primary key comment '主键id',
                      tagName     varchar(256)                            null comment '用户昵称',
                      userId      bigint                                  null comment '用户id',
                      parentId    bigint                                  null comment '父标签id',
@@ -78,3 +78,33 @@ create table tag (
 )   comment '标签';
 
 alter table user add column tags varchar(1024) null comment '标签列表';
+
+
+drop table if exists team;
+
+create table team (
+                      id          bigint auto_increment                   primary key comment '队伍id',
+                      userId      bigint                                  null comment '创建人id',
+                      teamName    varchar(256)                            not null comment '队伍名称',
+                      description varchar(1024)                           null comment '队伍介绍',
+                      maxNum      int                                     null comment '队伍最大人数',
+                      expireTime  datetime                                null comment '队伍过期时间',
+                      status      int                                     not null comment '队伍状态(0-公开 1-私有 2-加密)',
+                      password    varchar(256)                            null comment '队伍密码',
+                      createTime  datetime    default CURRENT_TIMESTAMP   null comment '创建时间',
+                      updateTime  datetime    default CURRENT_TIMESTAMP   null on update CURRENT_TIMESTAMP comment '更新时间',
+                      isDeleted   int         default 0                   not null comment '是否删除'
+)   comment '队伍';
+
+drop table if exists team_user;
+
+create table team_user (
+                    id          bigint auto_increment                   primary key comment '主键id',
+                    teamId      bigint                           null comment '队伍id',
+                    userId      bigint                                  null comment '队员id',
+                    joinTime    datetime                                null comment '加入队伍时间',
+                    createTime  datetime    default CURRENT_TIMESTAMP   null comment '创建时间',
+                    updateTime  datetime    default CURRENT_TIMESTAMP   null on update CURRENT_TIMESTAMP comment '更新时间',
+                    isDeleted   int         default 0                   not null comment '是否删除'
+
+) comment '队伍成员关系';
