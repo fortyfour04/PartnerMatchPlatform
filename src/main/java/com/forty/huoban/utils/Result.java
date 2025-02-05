@@ -1,5 +1,7 @@
 package com.forty.huoban.utils;
 
+import com.forty.huoban.model.enums.ResultCodeEnum;
+
 /**
  * @author: FortyFour
  * @description: 全局统一返回结果类

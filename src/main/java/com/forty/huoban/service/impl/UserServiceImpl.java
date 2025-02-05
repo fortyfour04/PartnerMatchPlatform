@@ -8,7 +8,7 @@ import com.forty.huoban.model.domain.User;
 import com.forty.huoban.mapper.UserMapper;
 import com.forty.huoban.service.UserService;
 import com.forty.huoban.utils.Result;
-import com.forty.huoban.utils.ResultCodeEnum;
+import com.forty.huoban.model.enums.ResultCodeEnum;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.springframework.stereotype.Service;
@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.forty.huoban.constant.UserConstant.USER_LOGIN_STATE;
-import static com.forty.huoban.utils.ResultCodeEnum.*;
+import static com.forty.huoban.model.enums.ResultCodeEnum.*;
 
 /**
 * @author fortyfour

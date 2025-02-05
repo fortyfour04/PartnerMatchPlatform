@@ -1,6 +1,6 @@
 package com.forty.huoban.exception;
 
-import com.forty.huoban.utils.ResultCodeEnum;
+import com.forty.huoban.model.enums.ResultCodeEnum;
 
 /**
  * @author: FortyFour

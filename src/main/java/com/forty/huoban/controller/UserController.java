@@ -8,10 +8,9 @@ import com.forty.huoban.model.request.UserLoginRequest;
 import com.forty.huoban.model.request.UserRegisterRequest;
 import com.forty.huoban.service.UserService;
 import com.forty.huoban.utils.Result;
-import com.forty.huoban.utils.ResultCodeEnum;
+import com.forty.huoban.model.enums.ResultCodeEnum;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,12 +21,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
-import static com.forty.huoban.constant.UserConstant.USER_LOGIN_STATE;
 
 
 /**

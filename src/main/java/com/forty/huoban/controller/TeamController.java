@@ -4,10 +4,13 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.forty.huoban.exception.BusinessException;
 import com.forty.huoban.model.domain.Team;
+import com.forty.huoban.model.domain.User;
 import com.forty.huoban.model.dto.TeamQuery;
+import com.forty.huoban.model.request.TeamAddRequest;
 import com.forty.huoban.service.TeamService;
+import com.forty.huoban.service.UserService;
 import com.forty.huoban.utils.Result;
-import com.forty.huoban.utils.ResultCodeEnum;
+import com.forty.huoban.model.enums.ResultCodeEnum;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +18,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -31,20 +35,23 @@ import java.util.List;
 public class TeamController {
 
     @Autowired
+    private UserService userService;
+
+    @Autowired
     private TeamService teamService;
 
     @ApiOperation("新增队伍")
     @PostMapping("/add")
-    public Result<Long> addTeam(@RequestBody Team team) {
-        if (team == null) {
+    public Result<Long> addTeam(@RequestBody TeamAddRequest teamAddRequest, HttpServletRequest request) {
+        if (teamAddRequest == null) {
             throw new BusinessException(ResultCodeEnum.PARAM_ERROR);
         }
-        boolean res = teamService.save(team);
-        if (!res) {
-            throw new BusinessException(ResultCodeEnum.SYSTEM_ERROR,"插入失败");
-        }
+        User loginUser = userService.getLoginUser(request);
+        Team team = new Team();
+        BeanUtils.copyProperties(teamAddRequest, team);
+        long res = teamService.addTeam(team, loginUser);
         System.out.println("Add Team Succeed");
-        return Result.ok(team.getId());
+        return Result.ok(res);
     }
 
     @ApiOperation("删除队伍")
@@ -110,7 +117,7 @@ public class TeamController {
         }
         //将对应的query数据copy进第一个参数team中
         Team team = new Team();
-        BeanUtils.copyProperties(team, teamQuery);
+        BeanUtils.copyProperties(teamQuery, team);
         QueryWrapper<Team> wrapper = new QueryWrapper<>(team);
         //加入对应分页参数后查询
         Page<Team> teamPage = new Page<>(teamQuery.getPageNum(),teamQuery.getPageSize());
