@@ -2,7 +2,7 @@ package com.forty.huoban.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.forty.huoban.domain.TeamUser;
+import com.forty.huoban.model.domain.TeamUser;
 import com.forty.huoban.exception.BusinessException;
 import com.forty.huoban.mapper.TeamMapper;
 import com.forty.huoban.model.domain.Team;

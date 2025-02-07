@@ -1,4 +1,4 @@
-package com.forty.huoban.domain;
+package com.forty.huoban.model.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;

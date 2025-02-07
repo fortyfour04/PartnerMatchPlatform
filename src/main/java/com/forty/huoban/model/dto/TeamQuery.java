@@ -1,7 +1,5 @@
 package com.forty.huoban.model.dto;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.forty.huoban.utils.PageRequest;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

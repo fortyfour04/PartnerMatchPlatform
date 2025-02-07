@@ -1,6 +1,6 @@
 package com.forty.huoban.service;
 
-import com.forty.huoban.domain.TeamUser;
+import com.forty.huoban.model.domain.TeamUser;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**

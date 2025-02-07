@@ -1,7 +1,7 @@
 package com.forty.huoban.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.forty.huoban.domain.TeamUser;
+import com.forty.huoban.model.domain.TeamUser;
 import com.forty.huoban.service.TeamUserService;
 import com.forty.huoban.mapper.TeamUserMapper;
 import org.springframework.stereotype.Service;
