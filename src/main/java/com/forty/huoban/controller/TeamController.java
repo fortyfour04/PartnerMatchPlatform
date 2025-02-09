@@ -7,6 +7,7 @@ import com.forty.huoban.model.domain.Team;
 import com.forty.huoban.model.domain.User;
 import com.forty.huoban.model.dto.TeamQuery;
 import com.forty.huoban.model.request.TeamAddRequest;
+import com.forty.huoban.model.vo.TeamUserVo;
 import com.forty.huoban.service.TeamService;
 import com.forty.huoban.service.UserService;
 import com.forty.huoban.utils.Result;
@@ -72,7 +73,7 @@ public class TeamController {
     @PostMapping("/update")
     public Result<Boolean> updateTeam(@RequestBody Team team) {
         if (team == null) {
-            throw new BusinessException(ResultCodeEnum.PARAM_ERROR);
+            throw new BusinessException(ResultCodeEnum.NULL_ERROR,"请求参数为空");
         }
         boolean res = teamService.updateById(team);
         if (!res){
@@ -96,15 +97,12 @@ public class TeamController {
 
     @ApiOperation("根据对应信息查询队伍列表")
     @GetMapping("/list")
-    public Result<List<Team>> listTeam(TeamQuery teamQuery) {
+    public Result<List<TeamUserVo>> listTeam(TeamQuery teamQuery, HttpServletRequest request) {
         if (teamQuery == null) {
             throw new BusinessException(ResultCodeEnum.PARAM_ERROR);
         }
-        //将对应的query数据copy进第一个参数team中
-        Team team = new Team();
-        BeanUtils.copyProperties(team, teamQuery);
-        QueryWrapper<Team> wrapper = new QueryWrapper<>(team);
-        List<Team> list = teamService.list(wrapper);
+        boolean isAdmin = userService.isAdmin(request);
+        List<TeamUserVo> list = teamService.listTeam(teamQuery,isAdmin);
         System.out.println("Query Team Succeed");
         return Result.ok(list);
     }

@@ -1,5 +1,7 @@
 package com.forty.huoban.model.vo;
 
+import lombok.Data;
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -10,6 +12,7 @@ import java.util.List;
  * @time: 2025/2/7 12:22
  * @version:
  */
+@Data
 public class TeamUserVo implements Serializable {
     /**
      * 主键id
@@ -22,9 +25,9 @@ public class TeamUserVo implements Serializable {
     private Long teamId;
 
     /**
-     * 队员id
+     * 队伍创始人id
      */
-    private Long userId;
+    private UserVo creator;
 
     /**
      * 加入队伍时间

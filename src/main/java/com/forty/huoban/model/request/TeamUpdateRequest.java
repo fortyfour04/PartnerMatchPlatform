@@ -1,5 +1,7 @@
 package com.forty.huoban.model.request;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -7,14 +9,19 @@ import java.util.Date;
 
 /**
  * @author: FortyFour
- * @description: 队伍新增请求类
- * @time: 2025/2/5 21:46
+ * @description: 队伍更新请求类
+ * @time: 2025/2/9 14:48
  * @version:
  */
 @Data
-public class TeamAddRequest implements Serializable {
+public class TeamUpdateRequest implements Serializable {
 
-    private static final long serialVersionUID = 3191241716373120793L;
+    private static final long serialVersionUID = 1L;
+
+    /**
+     * 队伍id
+     */
+    private Long id;
 
     /**
      * 队伍名称
@@ -32,7 +39,7 @@ public class TeamAddRequest implements Serializable {
     private Integer maxNum;
 
     /**
-     * 队伍过期时间 注：MySQl时区会自动加东八区8h，需要在前端传来的数据格式中进行修改!!
+     * 队伍过期时间
      */
     private Date expireTime;
 
@@ -45,4 +52,5 @@ public class TeamAddRequest implements Serializable {
      * 队伍密码
      */
     private String password;
+
 }

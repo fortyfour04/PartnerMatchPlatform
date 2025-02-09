@@ -2,7 +2,6 @@ package com.forty.huoban.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.forty.huoban.model.domain.User;
-import com.forty.huoban.utils.Result;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;

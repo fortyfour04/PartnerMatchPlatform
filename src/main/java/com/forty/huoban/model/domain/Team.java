@@ -22,7 +22,7 @@ public class Team implements Serializable {
     /**
      * 创建人id
      */
-    private Long userId;
+    private Long creatorId;
 
     /**
      * 队伍名称

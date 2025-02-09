@@ -1,5 +1,7 @@
 package com.forty.huoban.model.vo;
 
+import lombok.Data;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -9,6 +11,7 @@ import java.util.Date;
  * @time: 2025/2/7 12:21
  * @version:
  */
+@Data
 public class UserVo implements Serializable {
 
     /**
@@ -55,16 +58,6 @@ public class UserVo implements Serializable {
      * 状态0-正常
      */
     private Integer userStatus;
-
-    /**
-     *
-     */
-    private Date createTime;
-
-    /**
-     *
-     */
-    private Date updateTime;
 
     /**
      * 用户角色 0-普通用户 1-管理员

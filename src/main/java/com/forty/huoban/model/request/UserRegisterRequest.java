@@ -6,7 +6,7 @@ import java.io.Serializable;
 
 /**
  * @author: FortyFour
- * @description: 用户注册请求类
+ * @description: 用户注册(新增用户)请求类
  * @time: 2024/12/3 19:53
  * @version:
  */

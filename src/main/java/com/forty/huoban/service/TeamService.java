@@ -3,6 +3,11 @@ package com.forty.huoban.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.forty.huoban.model.domain.Team;
 import com.forty.huoban.model.domain.User;
+import com.forty.huoban.model.dto.TeamQuery;
+import com.forty.huoban.model.request.TeamUpdateRequest;
+import com.forty.huoban.model.vo.TeamUserVo;
+
+import java.util.List;
 
 /**
 * @author 18140
@@ -14,8 +19,24 @@ public interface TeamService extends IService<Team> {
     /**
      * 新增队伍
      * @param team , loginUser
-     * @return Long
+     * @return teamId
      */
-    public Long addTeam(Team team, User loginUser);
+    Long addTeam(Team team, User loginUser);
 
+    /**
+     * 按要求查询队伍
+     * @param teamQuery
+     * @param isAdmin
+     * @return List<TeamUserVo>
+     */
+    List<TeamUserVo> listTeam(TeamQuery teamQuery, boolean isAdmin);
+
+    /**
+     * 修改队伍
+     *
+     * @param teamUpdateRequest
+     * @param loginUser
+     * @return teamId
+     */
+    boolean updateTeam(TeamUpdateRequest teamUpdateRequest, User loginUser);
 }

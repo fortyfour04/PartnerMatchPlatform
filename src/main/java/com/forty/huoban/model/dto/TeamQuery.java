@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author: FortyFour
@@ -19,6 +20,11 @@ public class TeamQuery extends PageRequest {
      * 队伍id
      */
     private Long id;
+
+    /**
+     * 队伍id列表
+     */
+    private List<Long> idList;
 
     /**
      * 创建人id
@@ -59,5 +65,10 @@ public class TeamQuery extends PageRequest {
      * 更新时间
      */
     private Date updateTime;
+
+    /**
+     * 搜索关键字
+     */
+    private String searchText;
 
 }
