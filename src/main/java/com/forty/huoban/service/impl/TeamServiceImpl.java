@@ -12,6 +12,7 @@ import com.forty.huoban.model.domain.User;
 import com.forty.huoban.model.dto.TeamQuery;
 import com.forty.huoban.model.enums.ResultCodeEnum;
 import com.forty.huoban.model.enums.TeamStatusEnum;
+import com.forty.huoban.model.request.TeamJoinRequest;
 import com.forty.huoban.model.request.TeamUpdateRequest;
 import com.forty.huoban.model.vo.TeamUserVo;
 import com.forty.huoban.model.vo.UserVo;
@@ -26,7 +27,7 @@ import javax.annotation.Resource;
 import java.util.*;
 
 /**
-* @author 18140
+* @author Fortyfour
 * @description 针对表【team(队伍)】的数据库操作Service实现
 * @createDate 2025-02-04 14:38:22
 */
@@ -34,9 +35,10 @@ import java.util.*;
 public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
     implements TeamService{
 
-
     @Resource
     private TeamUserService teamUserService;
+
+    @Resource
     private UserService userService;
 
     /**
@@ -137,7 +139,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         if (teamQuery == null){
             throw new BusinessException(ResultCodeEnum.NULL_ERROR);
         }else {
-            Long id = teamQuery.getId();
+            Long id = teamQuery.getTeamId();
             if (id != null && id > 0){
                 wrapper.eq("id", id);
             }
@@ -214,27 +216,117 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         if (loginUser == null){
             throw new BusinessException(ResultCodeEnum.NOT_LOGIN,"尚未登录");
         }
-        Long id = teamUpdateRequest.getId();
-        if (id == null || id < 0){
+        //参数校验
+        Long teamId = teamUpdateRequest.getTeamId();
+        if (teamId == null || teamId < 0){
             throw new BusinessException(ResultCodeEnum.PARAM_ERROR,"参数错误");
         }
-        Team oldTeam = this.getById(id);
+        //校验该用户是否存在
+        Team oldTeam = this.getById(teamId);
         if (oldTeam == null){
-            throw new BusinessException(ResultCodeEnum.NULL_ERROR,"没有查询到该用户信息");
+            throw new BusinessException(ResultCodeEnum.NULL_ERROR,"没有查询到相关信息");
         }
+        //只有队伍创始人或系统设置的管理员可以对队伍进行修改
         if (!Objects.equals(oldTeam.getCreatorId(), loginUser.getId()) && !userService.isAdmin(loginUser)){
             throw new BusinessException(ResultCodeEnum.NO_AUTH,"无权限修改!") ;
         }
+        //如果队伍状态修改为加密，必须要有密码
         Integer statusCode = teamUpdateRequest.getStatus();
         TeamStatusEnum statusEnum = TeamStatusEnum.getTeamStatusEnumByCode(statusCode);
         String password = teamUpdateRequest.getPassword();
         if (statusEnum == TeamStatusEnum.PRIVATE && password.isEmpty()){
             throw new BusinessException(ResultCodeEnum.PARAM_ERROR,"未设置密码");
         }
+        //如果队伍状态修改为公开，则拒绝传输密码并将原密码清空
+        if (statusEnum == TeamStatusEnum.PUBLIC && !password.isEmpty()){
+            teamUpdateRequest.setPassword("");
+            throw new BusinessException(ResultCodeEnum.PARAM_ERROR,"无需设置密码");
+        }
         Team team = new Team();
         BeanUtils.copyProperties(teamUpdateRequest, team);
         return this.updateById(team);
     }
+
+    /**
+     * 加入队伍
+     * @param teamJoinRequest
+     * @param loginUser
+     * @return boolean
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean joinTeam(TeamJoinRequest teamJoinRequest, User loginUser) {
+        //是否登录，未登录则不允许更新
+        if (loginUser == null){
+            throw new BusinessException(ResultCodeEnum.NOT_LOGIN,"尚未登录");
+        }
+        //参数校验
+        if (teamJoinRequest == null){
+            throw new BusinessException(ResultCodeEnum.PARAM_ERROR,"参数错误");
+        }
+        Long teamId = teamJoinRequest.getTeamId();
+        if (teamId == null || teamId < 0){
+            throw new BusinessException(ResultCodeEnum.PARAM_ERROR,"参数错误");
+        }
+        Team team = this.getById(teamId);
+        if (team == null){
+            throw new BusinessException(ResultCodeEnum.NULL_ERROR,"队伍不存在");
+        }
+        Date expireTime = team.getExpireTime();
+        if (expireTime != null && expireTime.before(new Date())){
+            throw new BusinessException(ResultCodeEnum.PARAM_ERROR,"队伍已过期");
+        }
+
+        //业务需求实现
+        //用户最多加入5支队伍
+        Long userId = loginUser.getId();
+        QueryWrapper<TeamUser> teamUserQueryWrapper = new QueryWrapper<>();
+        teamUserQueryWrapper.eq("user_id", userId);
+        long hasJoinedTeamCount = teamUserService.count(teamUserQueryWrapper);
+        if (hasJoinedTeamCount >= 5){
+            throw new BusinessException(ResultCodeEnum.PARAM_ERROR,"最多同时创建或加入5支队伍");
+        }
+        //不能重复加入已加入的队伍(包括自己创建的)
+        teamUserQueryWrapper = new QueryWrapper<>();
+        teamUserQueryWrapper.eq("team_id", teamId);
+        teamUserQueryWrapper.eq("user_id", userId);
+        long hasJoinedTeam = teamUserService.count(teamUserQueryWrapper);
+        if (hasJoinedTeam > 0){
+            throw new BusinessException(ResultCodeEnum.PARAM_ERROR,"不能重复加入队伍");
+        }
+        //只能加入未满和未过期的队伍
+        teamUserQueryWrapper = new QueryWrapper<>();
+        QueryWrapper<Team> teamWrapper = new QueryWrapper<>();
+        teamUserQueryWrapper.eq("team_id", teamId);
+        long teamMemberNum = teamUserService.count(teamUserQueryWrapper);
+        if (teamMemberNum >= team.getMaxNum()){
+            throw new BusinessException(ResultCodeEnum.PARAM_ERROR,"该队伍人数已满");
+        }
+
+        //队伍权限校验需求实现
+        Integer statusCode = team.getStatus();
+        TeamStatusEnum statusEnum = TeamStatusEnum.getTeamStatusEnumByCode(statusCode);
+        //禁止加入私有队伍
+        if (statusEnum == TeamStatusEnum.PRIVATE){
+            throw new BusinessException(ResultCodeEnum.PARAM_ERROR,"禁止加入私密队伍");
+        }
+        //如果队伍状态修改为加密，校验密码是否正确
+        String password = teamJoinRequest.getPassword();
+        String checkPassword = team.getPassword();
+        if (statusEnum == TeamStatusEnum.ENCRYPTED ){
+            if (password.isEmpty() || !password.equals(checkPassword) ){
+                throw new BusinessException(ResultCodeEnum.PASSWORD_ERROR,"密码错误");
+            }
+        }
+
+        //校验完毕插入数据
+        TeamUser teamUser = new TeamUser();
+        BeanUtils.copyProperties(teamJoinRequest, teamUser);
+        teamUser.setJoinTime(new Date());
+        return teamUserService.save(teamUser);
+    }
+
+
 }
 
 

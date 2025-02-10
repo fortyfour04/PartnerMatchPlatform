@@ -7,6 +7,8 @@ import com.forty.huoban.model.domain.Team;
 import com.forty.huoban.model.domain.User;
 import com.forty.huoban.model.dto.TeamQuery;
 import com.forty.huoban.model.request.TeamAddRequest;
+import com.forty.huoban.model.request.TeamJoinRequest;
+import com.forty.huoban.model.request.TeamUpdateRequest;
 import com.forty.huoban.model.vo.TeamUserVo;
 import com.forty.huoban.service.TeamService;
 import com.forty.huoban.service.UserService;
@@ -71,11 +73,12 @@ public class TeamController {
 
     @ApiOperation("修改队伍")
     @PostMapping("/update")
-    public Result<Boolean> updateTeam(@RequestBody Team team) {
-        if (team == null) {
+    public Result<Boolean> updateTeam(@RequestBody TeamUpdateRequest teamUpdateRequest, HttpServletRequest request) {
+        if (teamUpdateRequest == null) {
             throw new BusinessException(ResultCodeEnum.NULL_ERROR,"请求参数为空");
         }
-        boolean res = teamService.updateById(team);
+        User loginUser = userService.getLoginUser(request);
+        boolean res = teamService.updateTeam(teamUpdateRequest,loginUser);
         if (!res){
             throw new BusinessException(ResultCodeEnum.SYSTEM_ERROR,"更新失败");
         }
@@ -122,5 +125,16 @@ public class TeamController {
         Page<Team> resPage = teamService.page(teamPage,wrapper);
         System.out.println("Query Team Succeed");
         return Result.ok(resPage);
+    }
+
+    @ApiOperation("用户加入队伍")
+    @GetMapping("/join")
+    public Result<Boolean> joinTeam(@RequestBody TeamJoinRequest teamJoinRequest, HttpServletRequest request) {
+        if (teamJoinRequest == null) {
+            throw new BusinessException(ResultCodeEnum.PARAM_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        boolean res = teamService.joinTeam(teamJoinRequest, loginUser);
+        return Result.ok(res);
     }
 }

@@ -19,7 +19,7 @@ public class TeamQuery extends PageRequest {
     /**
      * 队伍id
      */
-    private Long id;
+    private Long teamId;
 
     /**
      * 队伍id列表

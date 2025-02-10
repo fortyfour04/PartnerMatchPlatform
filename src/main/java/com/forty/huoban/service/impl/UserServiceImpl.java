@@ -139,7 +139,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
 
 //        方法一：先查询所有用户，再在内存中进行查询
-        //查询所有
+//          查询所有
 //        long start = System.currentTimeMillis(); //运行时间比较两者性能
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         List<User> users = userMapper.selectList(queryWrapper);
