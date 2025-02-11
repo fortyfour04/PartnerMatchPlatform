@@ -8,6 +8,7 @@ import com.forty.huoban.model.domain.User;
 import com.forty.huoban.model.dto.TeamQuery;
 import com.forty.huoban.model.request.TeamAddRequest;
 import com.forty.huoban.model.request.TeamJoinRequest;
+import com.forty.huoban.model.request.TeamQuitRequest;
 import com.forty.huoban.model.request.TeamUpdateRequest;
 import com.forty.huoban.model.vo.TeamUserVo;
 import com.forty.huoban.service.TeamService;
@@ -128,13 +129,24 @@ public class TeamController {
     }
 
     @ApiOperation("用户加入队伍")
-    @GetMapping("/join")
+    @PostMapping("/join")
     public Result<Boolean> joinTeam(@RequestBody TeamJoinRequest teamJoinRequest, HttpServletRequest request) {
         if (teamJoinRequest == null) {
             throw new BusinessException(ResultCodeEnum.PARAM_ERROR);
         }
         User loginUser = userService.getLoginUser(request);
         boolean res = teamService.joinTeam(teamJoinRequest, loginUser);
+        return Result.ok(res);
+    }
+
+    @ApiOperation("用户退出/队长解散队伍")
+    @PostMapping("/quit")
+    public Result<Boolean> quitTeam(@RequestBody TeamQuitRequest teamQuitRequest, HttpServletRequest request) {
+        if (teamQuitRequest == null) {
+            throw new BusinessException(ResultCodeEnum.PARAM_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        boolean res = teamService.quitTeam(teamQuitRequest, loginUser);
         return Result.ok(res);
     }
 }

@@ -75,12 +75,6 @@ public class User implements Serializable {
     private Date updateTime;
 
     /**
-     * 
-     */
-    @TableLogic
-    private Integer isDeleted;
-
-    /**
      * 用户角色 0-普通用户 1-管理员
      */
     private Integer userRole;
@@ -89,6 +83,12 @@ public class User implements Serializable {
      * 标签列表
      */
     private String tags;
+
+    /**
+     *
+     */
+    @TableLogic
+    private Integer isDeleted;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;

@@ -20,9 +20,9 @@ public class Team implements Serializable {
     private Long id;
 
     /**
-     * 创建人id
+     * 队长id(默认为初始创建人)
      */
-    private Long creatorId;
+    private Long leaderId;
 
     /**
      * 队伍名称

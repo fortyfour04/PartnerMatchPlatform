@@ -5,6 +5,7 @@ import com.forty.huoban.model.domain.Team;
 import com.forty.huoban.model.domain.User;
 import com.forty.huoban.model.dto.TeamQuery;
 import com.forty.huoban.model.request.TeamJoinRequest;
+import com.forty.huoban.model.request.TeamQuitRequest;
 import com.forty.huoban.model.request.TeamUpdateRequest;
 import com.forty.huoban.model.vo.TeamUserVo;
 
@@ -48,4 +49,12 @@ public interface TeamService extends IService<Team> {
      * @return boolean
      */
     boolean joinTeam(TeamJoinRequest teamJoinRequest, User loginUser);
+
+    /**
+     * 退出队伍
+     * @param teamQuitRequest
+     * @param loginUser
+     * @return boolean
+     */
+    boolean quitTeam(TeamQuitRequest teamQuitRequest, User loginUser);
 }
