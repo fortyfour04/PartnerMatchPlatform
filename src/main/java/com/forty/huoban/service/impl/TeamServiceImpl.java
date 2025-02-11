@@ -293,7 +293,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
             throw new BusinessException(ResultCodeEnum.PARAM_ERROR,"不能重复加入队伍");
         }
         //只能加入未满和未过期的队伍
-        long teamMemberNum = this.teamMemberNum(teamId);
+        long teamMemberNum = this.getTeamMemberNum(teamId);
         if (teamMemberNum >= team.getMaxNum()){
             throw new BusinessException(ResultCodeEnum.PARAM_ERROR,"该队伍人数已满");
         }
@@ -358,7 +358,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         }
 
         //若队伍仅剩最后一人，则直接解散
-        long teamMemberNum = this.teamMemberNum(teamId);
+        long teamMemberNum = this.getTeamMemberNum(teamId);
         if (teamMemberNum <= 1) {
             this.removeById(teamId);
         }else {
@@ -379,8 +379,45 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
                 }
             }
         }
-        //此处对应team与user只删除一条数据，故不能用removeById
         return teamUserService.remove(teamUserQueryWrapper);
+    }
+
+    /**
+     * 队长解散队伍
+     * @param teamId
+     * @param loginUser
+     * @return boolean
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean deleteTeam(Long teamId, User loginUser) {
+        //是否登录，未登录则不允许更新
+        if (loginUser == null){
+            throw new BusinessException(ResultCodeEnum.NOT_LOGIN,"尚未登录");
+        }
+        //参数校验
+        if (teamId == null || teamId < 0){
+            throw new BusinessException(ResultCodeEnum.PARAM_ERROR,"参数错误");
+        }
+        Team team = this.getById(teamId);
+        if (team == null){
+            throw new BusinessException(ResultCodeEnum.NULL_ERROR,"队伍不存在");
+        }
+        //只有队长才有权限解散队伍
+        Long userId = loginUser.getId();
+        if (!userId.equals(team.getLeaderId())){
+            throw new BusinessException(ResultCodeEnum.NO_AUTH,"用户不是队长");
+        }
+        //删除队伍关系表中的数据
+        QueryWrapper<TeamUser> teamUserQueryWrapper = new QueryWrapper<>();
+        teamUserQueryWrapper.eq("team_id", teamId)
+                            .eq("user_id", userId);
+        boolean teamUserRemove = teamUserService.removeById(teamUserQueryWrapper);
+        if (!teamUserRemove){
+            throw new BusinessException(ResultCodeEnum.SYSTEM_ERROR,"队伍关系删除失败");
+        }
+        //删除队伍表中的数据
+        return this.removeById(teamId);
     }
 
     /**
@@ -388,7 +425,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
      * @param teamId
      * @return teamMemberNum
      */
-    public long teamMemberNum(long teamId){
+    public long getTeamMemberNum(long teamId){
         QueryWrapper<TeamUser> teamUserQueryWrapper = new QueryWrapper<>();
         teamUserQueryWrapper.eq("team_id", teamId);
         return teamUserService.count(teamUserQueryWrapper);

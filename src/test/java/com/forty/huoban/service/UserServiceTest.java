@@ -30,4 +30,5 @@ class UserServiceTest {
         Assert.assertNotNull(users);
 
     }
+
 }

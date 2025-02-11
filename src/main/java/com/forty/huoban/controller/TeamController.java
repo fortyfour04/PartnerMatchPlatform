@@ -58,20 +58,6 @@ public class TeamController {
         return Result.ok(res);
     }
 
-    @ApiOperation("删除队伍")
-    @PostMapping("/delete")
-    public Result<Boolean> deleteTeam(@RequestBody Long id) {
-        if (id == null) {
-            throw new BusinessException(ResultCodeEnum.PARAM_ERROR);
-        }
-        boolean res = teamService.removeById(id);
-        if (!res){
-            throw new BusinessException(ResultCodeEnum.SYSTEM_ERROR,"删除失败");
-        }
-        System.out.println("Delete Team Succeed");
-        return Result.ok(true);
-    }
-
     @ApiOperation("修改队伍")
     @PostMapping("/update")
     public Result<Boolean> updateTeam(@RequestBody TeamUpdateRequest teamUpdateRequest, HttpServletRequest request) {
@@ -88,7 +74,7 @@ public class TeamController {
 
     @ApiOperation("根据队伍id查询单一队伍")
     @GetMapping("/get")
-    public Result<Team> getTeamById(long id) {
+    public Result<Team> getTeamById(Long id) {
         if (id <= 0){
             throw new BusinessException(ResultCodeEnum.PARAM_ERROR);
         }
@@ -139,7 +125,7 @@ public class TeamController {
         return Result.ok(res);
     }
 
-    @ApiOperation("用户退出/队长解散队伍")
+    @ApiOperation("用户退出队伍")
     @PostMapping("/quit")
     public Result<Boolean> quitTeam(@RequestBody TeamQuitRequest teamQuitRequest, HttpServletRequest request) {
         if (teamQuitRequest == null) {
@@ -147,6 +133,17 @@ public class TeamController {
         }
         User loginUser = userService.getLoginUser(request);
         boolean res = teamService.quitTeam(teamQuitRequest, loginUser);
+        return Result.ok(res);
+    }
+
+    @ApiOperation("队长解散队伍")
+    @PostMapping("/delete")
+    public Result<Boolean> deleteTeam(@RequestBody Long teamId, HttpServletRequest request) {
+        if (teamId <= 0) {
+            throw new BusinessException(ResultCodeEnum.PARAM_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        boolean res = teamService.deleteTeam(teamId, loginUser);
         return Result.ok(res);
     }
 }
