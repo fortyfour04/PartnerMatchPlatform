@@ -101,7 +101,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         //  TODO: 存在Bug：用户可能同时创建多个队伍  加锁解决
         long leaderId = loginUser.getId(); //获取当前登录用户的id
         QueryWrapper<Team> wrapper = new QueryWrapper<>();
-        wrapper.eq("userId",leaderId);
+        wrapper.eq("leaderId",leaderId);
         long count = this.count(wrapper); //myBatisPlus 提供的Service增强 即BaseMapper中的selectCount
         if (count >= 5){
             throw new BusinessException(ResultCodeEnum.PARAM_ERROR,"创建队伍数量已达上限");
@@ -152,30 +152,31 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
 
             String searchText = teamQuery.getSearchText();
             if (StringUtils.isNotBlank(searchText)) {
-                wrapper.and(qw -> qw.like("name", searchText).or().like("description", searchText));
+                wrapper.and(qw -> qw.like("teamName", searchText).or().like("description", searchText));
             }
 
             Integer maxNum = teamQuery.getMaxNum();
             if (maxNum != null && maxNum > 0){
-                wrapper.eq("max_num",maxNum);
+                wrapper.eq("maxNum",maxNum);
             }
 
-            Long userId = teamQuery.getUserId();
-            if (userId != null && userId > 0){
-                wrapper.eq("user_id",userId);
+            Long leaderId = teamQuery.getLeaderId();
+            if (leaderId != null && leaderId > 0){
+                wrapper.eq("leaderId", leaderId);
             }
 
             Integer status = teamQuery.getStatus();
             TeamStatusEnum statusEnum = TeamStatusEnum.getTeamStatusEnumByCode(status);
-            //没设置则默认为私密
-            if (statusEnum == null){
-                statusEnum = TeamStatusEnum.PRIVATE;
-            }
-            //只有管理员才能查看加密还有非公开的房间
-            if (!isAdmin && TeamStatusEnum.PRIVATE.equals(statusEnum)){
+            //只有管理员才能查看私有房间
+            if (!isAdmin && TeamStatusEnum.PRIVATE.equals(statusEnum)) {
                 throw new BusinessException(ResultCodeEnum.NO_AUTH,"无权限");
             }
-            wrapper.eq("status",statusEnum.getCode());
+            //没设置权限查询范围则默认查找公开和加密的
+            if (statusEnum == null){
+                wrapper.in("status",TeamStatusEnum.PUBLIC.getCode(),TeamStatusEnum.ENCRYPTED.getCode());
+            }else {
+                wrapper.eq("status",statusEnum.getCode());
+            }
         }
         // 不展示已过期的队伍
         // 过期时间为空默认为不会过期；过期时间大于当前时间(gt:greater then)
@@ -186,7 +187,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         }
 
         List<TeamUserVo> teamUserVoList = new ArrayList<>();
-        // 关联查询创建人的用户信息
+        // 关联查询队长的用户信息
         for (Team team : teamList) {
             Long userId = team.getLeaderId();
             if (userId == null) {
@@ -199,7 +200,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
             if (user != null) {
                 UserVo userVo = new UserVo();
                 BeanUtils.copyProperties(user, userVo);
-                teamUserVo.setCreator(userVo);
+                teamUserVo.setLeader(userVo);
             }
             teamUserVoList.add(teamUserVo);
         }
@@ -218,15 +219,8 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
             throw new BusinessException(ResultCodeEnum.NOT_LOGIN,"尚未登录");
         }
         //参数校验
-        Long teamId = teamUpdateRequest.getTeamId();
-        if (teamId == null || teamId < 0){
-            throw new BusinessException(ResultCodeEnum.PARAM_ERROR,"参数错误");
-        }
-        //校验该用户是否存在
-        Team oldTeam = this.getById(teamId);
-        if (oldTeam == null){
-            throw new BusinessException(ResultCodeEnum.NULL_ERROR,"没有查询到相关信息");
-        }
+        Long teamId = teamUpdateRequest.getId();
+        Team oldTeam = getTeamById(teamId);
         //只有队伍创始人或系统设置的管理员可以对队伍进行修改
         if (!Objects.equals(oldTeam.getLeaderId(), loginUser.getId()) && !userService.isAdmin(loginUser)){
             throw new BusinessException(ResultCodeEnum.NO_AUTH,"无权限修改!") ;
@@ -266,13 +260,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
             throw new BusinessException(ResultCodeEnum.PARAM_ERROR,"参数错误");
         }
         Long teamId = teamJoinRequest.getTeamId();
-        if (teamId == null || teamId < 0){
-            throw new BusinessException(ResultCodeEnum.PARAM_ERROR,"参数错误");
-        }
-        Team team = this.getById(teamId);
-        if (team == null){
-            throw new BusinessException(ResultCodeEnum.NULL_ERROR,"队伍不存在");
-        }
+        Team team = getTeamById(teamId);
         Date expireTime = team.getExpireTime();
         if (expireTime != null && expireTime.before(new Date())){
             throw new BusinessException(ResultCodeEnum.PARAM_ERROR,"队伍已过期");
@@ -282,7 +270,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         //用户最多加入5支队伍
         Long userId = loginUser.getId();
         QueryWrapper<TeamUser> teamUserQueryWrapper = new QueryWrapper<>();
-        teamUserQueryWrapper.eq("user_id", userId);
+        teamUserQueryWrapper.eq("userId", userId);
         long hasJoinedTeamCount = teamUserService.count(teamUserQueryWrapper);
         if (hasJoinedTeamCount >= 5){
             throw new BusinessException(ResultCodeEnum.PARAM_ERROR,"最多同时创建或加入5支队伍");
@@ -339,19 +327,13 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
             throw new BusinessException(ResultCodeEnum.PARAM_ERROR,"参数错误");
         }
         Long teamId = teamQuitRequest.getTeamId();
-        if (teamId == null || teamId < 0){
-            throw new BusinessException(ResultCodeEnum.PARAM_ERROR,"参数错误");
-        }
-        Team team = this.getById(teamId);
-        if (team == null){
-            throw new BusinessException(ResultCodeEnum.NULL_ERROR,"队伍不存在");
-        }
+        Team team = getTeamById(teamId);
 
         //不能退出未加入的队伍
         Long userId = loginUser.getId();
         QueryWrapper<TeamUser> teamUserQueryWrapper = new QueryWrapper<>();
-        teamUserQueryWrapper.eq("team_id", teamId)
-                            .eq("user_id", userId);
+        teamUserQueryWrapper.eq("teamId", teamId)
+                            .eq("userId", userId);
         long hasJoinedTeam = teamUserService.count(teamUserQueryWrapper);
         if (hasJoinedTeam > 0){
             throw new BusinessException(ResultCodeEnum.PARAM_ERROR,"未加入该队伍");
@@ -396,13 +378,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
             throw new BusinessException(ResultCodeEnum.NOT_LOGIN,"尚未登录");
         }
         //参数校验
-        if (teamId == null || teamId < 0){
-            throw new BusinessException(ResultCodeEnum.PARAM_ERROR,"参数错误");
-        }
-        Team team = this.getById(teamId);
-        if (team == null){
-            throw new BusinessException(ResultCodeEnum.NULL_ERROR,"队伍不存在");
-        }
+        Team team = getTeamById(teamId);
         //只有队长才有权限解散队伍
         Long userId = loginUser.getId();
         if (!userId.equals(team.getLeaderId())){
@@ -410,14 +386,30 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         }
         //删除队伍关系表中的数据
         QueryWrapper<TeamUser> teamUserQueryWrapper = new QueryWrapper<>();
-        teamUserQueryWrapper.eq("team_id", teamId)
-                            .eq("user_id", userId);
-        boolean teamUserRemove = teamUserService.removeById(teamUserQueryWrapper);
+        teamUserQueryWrapper.eq("teamId", teamId)
+                            .eq("userId", userId);
+        boolean teamUserRemove = teamUserService.remove(teamUserQueryWrapper);
         if (!teamUserRemove){
             throw new BusinessException(ResultCodeEnum.SYSTEM_ERROR,"队伍关系删除失败");
         }
         //删除队伍表中的数据
         return this.removeById(teamId);
+    }
+
+    /**
+     * 根据id获取队伍
+     * @param teamId
+     * @return
+     */
+    private Team getTeamById(Long teamId) {
+        if (teamId == null || teamId < 0){
+            throw new BusinessException(ResultCodeEnum.PARAM_ERROR,"参数错误");
+        }
+        Team team = this.getById(teamId);
+        if (team == null){
+            throw new BusinessException(ResultCodeEnum.NULL_ERROR,"队伍不存在");
+        }
+        return team;
     }
 
     /**
@@ -439,8 +431,8 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
      */
     public boolean hasJoinedTeam(long teamId, long userId){
         QueryWrapper<TeamUser> teamUserQueryWrapper = new QueryWrapper<>();
-        teamUserQueryWrapper.eq("team_id", teamId)
-                            .eq("user_id", userId);
+        teamUserQueryWrapper.eq("teamId", teamId)
+                            .eq("userId", userId);
         return teamUserService.count(teamUserQueryWrapper) > 0;
     }
 

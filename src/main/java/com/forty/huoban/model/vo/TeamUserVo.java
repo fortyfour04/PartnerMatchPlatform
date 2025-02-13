@@ -25,9 +25,9 @@ public class TeamUserVo implements Serializable {
     private Long teamId;
 
     /**
-     * 队伍创始人id
+     * 队长id
      */
-    private UserVo creator;
+    private UserVo leader;
 
     /**
      * 加入队伍时间

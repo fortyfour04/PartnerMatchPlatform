@@ -4,6 +4,7 @@ import com.forty.huoban.utils.PageRequest;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
@@ -15,7 +16,8 @@ import java.util.List;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class TeamQuery extends PageRequest {
+public class TeamQuery extends PageRequest implements Serializable {
+    private static final long serialVersionUID = 1L;
     /**
      * 队伍id
      */
@@ -27,9 +29,9 @@ public class TeamQuery extends PageRequest {
     private List<Long> idList;
 
     /**
-     * 创建人id
+     * 队长id
      */
-    private Long userId;
+    private Long leaderId;
 
     /**
      * 队伍名称

@@ -84,7 +84,7 @@ drop table if exists team;
 
 create table team (
                       id          bigint auto_increment                   primary key comment '队伍id',
-                      userId      bigint                                  null comment '创建人id',
+                      leaderId    bigint                                  null comment '队长id，默认为创始人',
                       teamName    varchar(256)                            not null comment '队伍名称',
                       description varchar(1024)                           null comment '队伍介绍',
                       maxNum      int                                     null comment '队伍最大人数',

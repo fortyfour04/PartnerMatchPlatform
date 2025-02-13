@@ -1,5 +1,6 @@
 package com.forty.huoban.model.enums;
 
+import com.forty.huoban.exception.BusinessException;
 import lombok.Getter;
 
 /**
@@ -25,7 +26,7 @@ public enum TeamStatusEnum {
                 return teamStatusEnum;
             }
         }
-        return null;
+        throw new BusinessException(ResultCodeEnum.PARAM_ERROR,"状态参数错误");
     }
 
     TeamStatusEnum(int code, String desc) {

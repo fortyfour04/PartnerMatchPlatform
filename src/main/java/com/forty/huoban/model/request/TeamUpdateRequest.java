@@ -19,7 +19,7 @@ public class TeamUpdateRequest implements Serializable {
     /**
      * 队伍id
      */
-    private Long teamId;
+    private Long id;
 
     /**
      * 队伍名称

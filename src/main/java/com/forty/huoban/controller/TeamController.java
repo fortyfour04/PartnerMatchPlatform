@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.forty.huoban.exception.BusinessException;
 import com.forty.huoban.model.domain.Team;
+import com.forty.huoban.model.domain.TeamUser;
 import com.forty.huoban.model.domain.User;
 import com.forty.huoban.model.dto.TeamQuery;
 import com.forty.huoban.model.request.TeamAddRequest;
@@ -12,6 +13,7 @@ import com.forty.huoban.model.request.TeamQuitRequest;
 import com.forty.huoban.model.request.TeamUpdateRequest;
 import com.forty.huoban.model.vo.TeamUserVo;
 import com.forty.huoban.service.TeamService;
+import com.forty.huoban.service.TeamUserService;
 import com.forty.huoban.service.UserService;
 import com.forty.huoban.utils.Result;
 import com.forty.huoban.model.enums.ResultCodeEnum;
@@ -23,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -43,6 +46,9 @@ public class TeamController {
 
     @Autowired
     private TeamService teamService;
+
+    @Autowired
+    private TeamUserService teamUserService;
 
     @ApiOperation("新增队伍")
     @PostMapping("/add")
@@ -112,6 +118,33 @@ public class TeamController {
         Page<Team> resPage = teamService.page(teamPage,wrapper);
         System.out.println("Query Team Succeed");
         return Result.ok(resPage);
+    }
+
+    @ApiOperation("查询当前用户加入的队伍")
+    @GetMapping("/list/my/join")
+    public Result<List<TeamUserVo>> listMyJoinedTeam(TeamQuery teamQuery, HttpServletRequest request) {
+        if (teamQuery == null) {
+            throw new BusinessException(ResultCodeEnum.PARAM_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        QueryWrapper<TeamUser> teamUserQueryWrapper = new QueryWrapper<>();
+        teamUserQueryWrapper.eq("userId", loginUser.getId());
+        List<TeamUser> list = teamUserService.list(teamUserQueryWrapper);
+        ArrayList<TeamUserVo> teamUserVos = new ArrayList<>();
+        BeanUtils.copyProperties(list,teamUserVos);
+        return Result.ok(teamUserVos);
+    }
+
+    @ApiOperation("查询当前用户作为队长的队伍")
+    @GetMapping("/list/my/create")
+    public Result<List<TeamUserVo>> listMyLeadTeam(TeamQuery teamQuery, HttpServletRequest request) {
+        if (teamQuery == null) {
+            throw new BusinessException(ResultCodeEnum.PARAM_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        teamQuery.setLeaderId(loginUser.getId());
+        List<TeamUserVo> teamUserVoList = teamService.listTeam(teamQuery, true);
+        return Result.ok(teamUserVoList);
     }
 
     @ApiOperation("用户加入队伍")
