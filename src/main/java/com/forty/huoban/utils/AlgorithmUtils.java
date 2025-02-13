@@ -19,7 +19,7 @@ public class AlgorithmUtils {
      * @param tagList2
      * @return
      */
-    public static int minDistance(List<String> tagList1, List<String> tagList2) {
+    public static long minDistance(List<String> tagList1, List<String> tagList2) {
         int n = tagList1.size();
         int m = tagList2.size();
         if (n * m == 0) {
@@ -56,7 +56,7 @@ public class AlgorithmUtils {
      * @param word2
      * @return
      */
-    public static int minDistance(String word1, String word2) {
+    public static long minDistance(String word1, String word2) {
         int n = word1.length();
         int m = word2.length();
 

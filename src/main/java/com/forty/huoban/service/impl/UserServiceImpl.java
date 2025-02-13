@@ -4,11 +4,13 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.forty.huoban.constant.UserConstant;
 import com.forty.huoban.exception.BusinessException;
-import com.forty.huoban.model.domain.User;
 import com.forty.huoban.mapper.UserMapper;
-import com.forty.huoban.service.UserService;
-import com.forty.huoban.utils.Result;
+import com.forty.huoban.model.domain.User;
 import com.forty.huoban.model.enums.ResultCodeEnum;
+import com.forty.huoban.model.vo.UserVo;
+import com.forty.huoban.service.UserService;
+import com.forty.huoban.utils.AlgorithmUtils;
+import com.forty.huoban.utils.Result;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.forty.huoban.constant.UserConstant.USER_LOGIN_STATE;
 import static com.forty.huoban.model.enums.ResultCodeEnum.*;
@@ -314,6 +317,40 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         Object objUser = request.getSession().getAttribute(USER_LOGIN_STATE);
         User user = (User) objUser;
         return user != null && user.getUserRole() == UserConstant.ADMIN_ROLE;
+    }
+
+    /**
+     * 根据标签相似度进行匹配推荐
+     * @param num
+     * @param loginUser
+     */
+    @Override
+    public List<User> matchUser(long num, User loginUser) {
+        List<User> userList = this.list();
+        String loginUserTags = loginUser.getTags();
+        //使用Gson将tags字段中的json字符串解析为String列表
+        //使用SortedMap对距离向量进行排序
+        Gson gson = new Gson();
+        SortedMap<Integer, Long> sortedDistanceMap = new TreeMap<>();
+        List<String> loginTagList = gson.fromJson(loginUserTags, new TypeToken<List<UserVo>>() {
+        }.getType());
+        for (int i = 0; i < userList.size(); i++) {
+            User user = userList.get(i);
+            String userTags = user.getTags();
+            if (userTags.isEmpty()) {
+                continue;
+            }
+            List<String> userTagList = gson.fromJson(userTags, new TypeToken<List<UserVo>>() {
+            }.getType());
+            //利用匹配算法工具计算距离向量
+            long Distance = AlgorithmUtils.minDistance(userTagList, loginTagList);
+            sortedDistanceMap.put(i, Distance);
+        }
+        //找出距离向量最短的nums条数据
+        List<Integer> minDistanceList = sortedDistanceMap.keySet().stream().limit(num).collect(Collectors.toList());
+        return minDistanceList.stream().map(index -> {
+            return getSafetyUser(userList.get(index));
+        }).collect(Collectors.toList());
     }
 
 }

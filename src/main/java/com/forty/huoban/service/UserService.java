@@ -2,6 +2,7 @@ package com.forty.huoban.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.forty.huoban.model.domain.User;
+import com.forty.huoban.model.vo.UserVo;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
@@ -83,4 +84,11 @@ public interface UserService extends IService<User> {
      * @return Boolean
      */
     public Boolean isAdmin(HttpServletRequest request);
+
+    /**
+     * 根据标签相似度进行匹配推荐
+     * @param num
+     * @param loginUser
+     */
+    List<User> matchUser(long num, User loginUser);
 }

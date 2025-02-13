@@ -27,9 +27,9 @@ public class AlgorithmUtilsTest {
         List<String> list1 = Arrays.asList("JAVA","Python","大一");
         List<String > list2 = Arrays.asList("JAVA","C++","大一");
         List<String> list3 = Arrays.asList("Go","大一");
-        int score1 = AlgorithmUtils.minDistance(list1, list2);
-        int score2 = AlgorithmUtils.minDistance(list1, list3);
-        int score3 = AlgorithmUtils.minDistance(list2, list3);
+        long score1 = AlgorithmUtils.minDistance(list1, list2);
+        long score2 = AlgorithmUtils.minDistance(list1, list3);
+        long score3 = AlgorithmUtils.minDistance(list2, list3);
         System.out.println(score1);
         System.out.println(score2);
         System.out.println(score3);

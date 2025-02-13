@@ -6,6 +6,7 @@ import com.forty.huoban.exception.BusinessException;
 import com.forty.huoban.model.domain.User;
 import com.forty.huoban.model.request.UserLoginRequest;
 import com.forty.huoban.model.request.UserRegisterRequest;
+import com.forty.huoban.model.vo.UserVo;
 import com.forty.huoban.service.UserService;
 import com.forty.huoban.utils.Result;
 import com.forty.huoban.model.enums.ResultCodeEnum;
@@ -174,4 +175,14 @@ public class UserController {
         return Result.ok(bool);
     }
 
+    @ApiOperation("根据标签相似度进行匹配推荐")
+    @GetMapping("/match")
+    public Result<List<User>> matchUser(long num, HttpServletRequest request) {
+        if (num <= 0 || num > 15) {
+            throw new BusinessException(ResultCodeEnum.PARAM_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        List<User> userVos = userService.matchUser(num, loginUser);
+        return Result.ok(userVos);
+    }
 }
