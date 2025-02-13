@@ -1,7 +1,6 @@
 package com.forty.huoban.service;
 
 import com.forty.huoban.model.domain.User;
-import io.swagger.models.auth.In;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -47,7 +46,6 @@ public class RedisTest {
         Object sakura = valueOperations.get("sakura");
         Assertions.assertTrue(20 == (Integer) sakura);
         System.out.println(valueOperations.get("user"));
-
 
     }
 }
